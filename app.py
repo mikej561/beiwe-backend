@@ -14,10 +14,11 @@ from authentication.admin_authentication import is_logged_in
 from libs.security import set_secret_key
 from pages import (admin_pages, data_access_web_form, mobile_pages, survey_designer,
     system_admin_pages)
-
+from flask_cors import CORS
 
 def subdomain(directory):
     app = Flask(__name__, static_folder=directory + "/static")
+    CORS(app)
     set_secret_key(app)
     loader = [app.jinja_loader, jinja2.FileSystemLoader(directory + "/templates")]
     app.jinja_loader = jinja2.ChoiceLoader(loader)
