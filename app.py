@@ -8,7 +8,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from api import (admin_api, copy_study_api, dashboard_api, data_access_api, data_pipeline_api,
     mobile_api, participant_administration, push_notifications_api, study_api, survey_api)
-from api.tableau_api.views import SummaryStatisticDailyStudyView
+from api.tableau_api.views import SummaryStatisticDailyStudyView, WDC
 from config.settings import SENTRY_ELASTIC_BEANSTALK_DSN, SENTRY_JAVASCRIPT_DSN
 from authentication.admin_authentication import is_logged_in
 from libs.security import set_secret_key
@@ -22,6 +22,7 @@ def subdomain(directory):
     loader = [app.jinja_loader, jinja2.FileSystemLoader(directory + "/templates")]
     app.jinja_loader = jinja2.ChoiceLoader(loader)
     app.wsgi_app = ProxyFix(app.wsgi_app)
+    app.add_url_rule('/yay', view_func=WDC.as_view("yay"))
     return app
 
 
