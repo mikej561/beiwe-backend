@@ -10,6 +10,7 @@ from typing import DefaultDict, Generator, List, Tuple
 from botocore.exceptions import ReadTimeoutError
 from cronutils.error_handler import ErrorHandler
 from django.core.exceptions import ValidationError
+from psutil import cpu_count, virtual_memory
 
 from config.constants import (ACCELEROMETER, ANDROID_LOG_FILE, API_TIME_FORMAT, CALL_LOG,
     CHUNK_TIMESLICE_QUANTUM, CHUNKABLE_FILES, CHUNKS_FOLDER,
@@ -80,6 +81,22 @@ def process_file_chunks():
     raise EverythingWentFine(DATA_PROCESSING_NO_ERROR_STRING)
 
 
+def files_to_process(participant: Participant) -> FileToProcess:
+    # base-2 value for 256MB times the number of cpu cores: should ensure about 256 megs per python
+    # process. This should give us enough space for runtime in most circumstances.
+    RAM = 2**29 * cpu_count()
+
+    # Sorting by file path is a proxy for sorting by data type, this will group the potential files
+    # to be processed by data type and time proximity.  This will generally reduce the s3 call counts
+    # to the output files.
+    query = participant.files_to_process.exclude(deleted=True).order_by("s3_file_path")
+
+    for i, file_to_process in enumerate(query):
+        if virtual_memory().available > RAM:
+            print(f"yielding {i}...")
+            yield file_to_process
+
+
 def do_process_user_file_chunks(count: int, error_handler: ErrorHandler, skip_count: int,
                                 participant: Participant):
     """
@@ -112,15 +129,12 @@ def do_process_user_file_chunks(count: int, error_handler: ErrorHandler, skip_co
     # A Django query with a slice (e.g. .all()[x:y]) makes a LIMIT query, so it
     # only gets from the database those FTPs that are in the slice.
     # print(participant.as_unpacked_native_python())
-    print(len(participant.files_to_process.exclude(deleted=True).all()))
-    print(count)
-    print(skip_count)
+    print(participant.files_to_process.exclude(deleted=True).all().count())
+    # print(count)
+    # print(skip_count)
 
-    files_to_process = participant.files_to_process.exclude(deleted=True).all()
-
-    for data in pool.map(batch_retrieve_for_processing,
-                         files_to_process[skip_count:count+skip_count],
-                         chunksize=1):
+    # files_to_process = participant.files_to_process.exclude(deleted=True).all()
+    for data in pool.map(batch_retrieve_for_processing, files_to_process(participant), chunksize=1):
         with error_handler:
             if data['exception']:
                 raise_data_processing_error(data)
