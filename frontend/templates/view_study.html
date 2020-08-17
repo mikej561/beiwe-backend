@@ -4,7 +4,7 @@
 
 {% block content %}
 
-  <div class="container">
+  <div class="container" style="max-width:1920px;">
     <div class="span12">
       <div class="row">
       </div>
@@ -28,6 +28,7 @@
       <table class="table" id="participant_list">
         <thead>
         <tr>
+          <th>Creation Date</th>
           <th>Patient ID</th>
           <th>Phone registered</th>
           <th>Phone OS</th>
@@ -43,6 +44,7 @@
 
         {% for participant in participants %}
           <tr>
+            <td> {{ participant.created_on.date().isoformat() }} </td>
             <td>
               {% if readonly %}
                 {{ participant.patient_id }}
