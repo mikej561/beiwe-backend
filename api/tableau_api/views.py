@@ -103,6 +103,8 @@ class WDC(MethodView):
     def get(self):
         return render_template('wdc.html')
 
+
+
 class CommaSeparatedListFieldMixin:
     """ A mixin for use with django form fields. This mixin changes the field to accept a comma separated list of
         inputs that are individually cleaned and validated. Takes one optional parameter, list_validators, which is
