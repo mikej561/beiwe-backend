@@ -30,7 +30,8 @@
         <tr>
           <th>Creation Date</th>
           <th>Patient ID</th>
-          <th>Phone registered</th>
+          <th>Status</th>
+          <th>Device</th>
           <th>Phone OS</th>
           {% for intervention in interventions | sort(case_sensitive=Flase) %}
             <th>{{ intervention }}</th>
@@ -53,13 +54,10 @@
               {% endif %}
             </td>
             <td>
-              {% if participant.device_id %}
-                <form action="/reset_device" method="post">
-                  Smartphone registered
-                </form>
-              {% else %}
-                No smartphone registered
-              {% endif %}
+              {% if participant.registered_ever %}Registred{% else %}Never Registred{% endif %}
+            </td>
+            <td>
+              {% if participant.device_id %}Restricted{% else %}Unrestricted{% endif %}
             </td>
             <td>
               {% if participant.os_type %}

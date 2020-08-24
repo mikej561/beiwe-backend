@@ -1,6 +1,12 @@
 $(document).ready(function(){
     // Set up the main list of patients using DataTables
-    $("#participant_list").DataTable();
+    $("#participant_list").DataTable(
+        // {
+        //     "columnDefs": [
+        //         {"searchable": false, "targets": 2}
+        //     ]
+        // }
+    );
 
     $('#many-new-patients-loading-spinner').hide();
 

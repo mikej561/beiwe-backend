@@ -1,6 +1,7 @@
-
+from django.db.models import Exists, OuterRef
 from flask import abort, Blueprint, flash, Markup, redirect, render_template, request, session
 
+from database.data_access_models import ChunkRegistry
 from database.study_models import Study, StudyField
 from database.user_models import Participant, ParticipantFieldValue, Researcher
 from authentication import admin_authentication
@@ -48,10 +49,17 @@ def view_study(study_id=None):
     study_fields = list(study.fields.all().values_list('field_name', flat=True))
     interventions = list(study.interventions.all().values_list("name", flat=True))
 
+    # This is a highly optimized query that determines if the participant has any chunk registries,
+    # this datapoint is a proxy for registration, when users create an identifiers file.
+    has_chunks = set(Participant.objects.annotate(
+        has_chunks=Exists(ChunkRegistry.objects.filter(participant=OuterRef('pk')))
+    ).filter(study=study, has_chunks=True))
+
     # creates dicts of Custom Fields and Interventions to be easily accessed in the template
     for p in participants:
         p.field_dict = {tag.field.field_name: tag.value for tag in p.field_values.all()}
         p.intervention_dict = {tag.intervention.name: tag.date for tag in p.intervention_dates.all()}
+        p.registered_ever = p.pk in has_chunks
 
     return render_template(
         'view_study.html',
