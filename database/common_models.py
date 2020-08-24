@@ -68,40 +68,8 @@ class UtilityModel(models.Model):
         return self._meta.model.objects.get(id=self.id)
 
     @property
-    def _related(self):
-        """ Gets all related objects for this database object (warning: probably huge).
-            This is intended for debugging only. """
-        ret = {}
-        db_calls = 0
-        entities_returned = 0
-        for related_field in self._meta.related_objects:
-            # There is no predictable way to access related models that do not have related names.
-            # ... unless there is a way to inspect related_field.related_model._meta._relation_tree
-            # and determine the field relationship to then magically create a query? :D
-
-            # one to one fields use this...
-            if related_field.one_to_one and related_field.related_name:
-                related_entity = getattr(self, related_field.related_name)
-                ret[related_field.related_name] = related_entity.as_dict() if related_entity else None
-            
-            # many to one and many to many use this.
-            elif related_field.related_name:
-                # get all the related things using .values() for access, but convert to dict
-                # because the whole point is we want these thing to be prettyprintable and nice.
-                related_manager = getattr(self, related_field.related_name)
-                db_calls += 1
-                ret[related_field.related_name] = [x for x in related_manager.all().values()]
-                entities_returned += len(ret[related_field.related_name])
-
-        return ret
-
-    @property
-    def _everything(self):
-        """ Gets _related and _contents. Will probably be huge. Debugging only. """
-        ret = self._contents
-        ret.update(self._related)
-        return ret
-
+    def _all(self, *args, **kwargs):
+        return self.__class__.objects
     def as_unpacked_native_python(self, remove_timestamps=True) -> dict:
         """
         Collect all of the fields of the model and return their values in a python dict,

@@ -11,10 +11,10 @@ from botocore.exceptions import ReadTimeoutError
 from cronutils.error_handler import ErrorHandler
 from django.core.exceptions import ValidationError
 
-from config.constants import (ACCELEROMETER, ANDROID_LOG_FILE, API_TIME_FORMAT, CALL_LOG,
-    CHUNK_TIMESLICE_QUANTUM, CHUNKABLE_FILES, CHUNKS_FOLDER,
-    DATA_PROCESSING_NO_ERROR_STRING, IDENTIFIERS, IOS_LOG_FILE,
-    SURVEY_DATA_FILES, SURVEY_TIMINGS, UPLOAD_FILE_TYPE_MAPPING, WIFI)
+from config.constants import (ACCELEROMETER, ANDROID_API, ANDROID_LOG_FILE, API_TIME_FORMAT,
+    CALL_LOG, CHUNK_TIMESLICE_QUANTUM, CHUNKABLE_FILES, CHUNKS_FOLDER,
+    DATA_PROCESSING_NO_ERROR_STRING, IDENTIFIERS, IOS_LOG_FILE, SURVEY_DATA_FILES, SURVEY_TIMINGS,
+    UPLOAD_FILE_TYPE_MAPPING, WIFI)
 from config.settings import CONCURRENT_NETWORK_OPS, FILE_PROCESS_PAGE_SIZE
 from database.data_access_models import ChunkRegistry, FileToProcess
 from database.survey_models import Survey
@@ -392,7 +392,7 @@ def process_csv_data(data: dict):
         Returns None If the csv has no data in it. """
     participant = data['ftp']['participant']
     
-    if participant.os_type == Participant.ANDROID_API:
+    if participant.os_type == ANDROID_API:
         # Do fixes for Android
         if data["data_type"] == ANDROID_LOG_FILE:
             data['file_contents'] = fix_app_log_file(data['file_contents'], data['ftp']['s3_file_path'])

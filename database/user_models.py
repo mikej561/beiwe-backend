@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import F, Func
 
-from config.constants import ResearcherRole
+from config.constants import OS_TYPE_CHOICES, ResearcherRole
 from database.common_models import UtilityModel
 from database.models import TimestampedModel
 from database.validators import ID_VALIDATOR, STANDARD_BASE_64_VALIDATOR, URL_SAFE_BASE_64_VALIDATOR
@@ -68,16 +68,6 @@ class Participant(AbstractPasswordUser):
     participants in the study, as well as information about the device the participant is using.
     A Participant uses mobile, so their passwords are hashed accordingly.
     """
-    
-    IOS_API = "IOS"
-    ANDROID_API = "ANDROID"
-    NULL_OS = ''
-    
-    OS_TYPE_CHOICES = (
-        (IOS_API, IOS_API),
-        (ANDROID_API, ANDROID_API),
-        (NULL_OS, NULL_OS),
-    )
 
     patient_id = models.CharField(max_length=8, unique=True, validators=[ID_VALIDATOR],
                                   help_text='Eight-character unique ID with characters chosen from 1-9 and a-z')
@@ -89,6 +79,8 @@ class Participant(AbstractPasswordUser):
 
     study = models.ForeignKey('Study', on_delete=models.PROTECT, related_name='participants', null=False)
     deleted = models.BooleanField(default=False)
+
+    last_activity = models.DateTimeField(null=True)
 
     @classmethod
     def create_with_password(cls, **kwargs):
