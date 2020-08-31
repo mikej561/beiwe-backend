@@ -44,7 +44,12 @@ INSTALLED_APPS = [
     'database.apps.DatabaseConfig',
     'django_extensions',
     'timezone_field',
+    "djcelery",
 ]
+
+import djcelery
+djcelery.setup_loader()
+
 
 SHELL_PLUS = "ipython"
 

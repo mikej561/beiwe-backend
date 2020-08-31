@@ -1,6 +1,8 @@
 # core libraries
 Django==2.2.14
 Flask>=1.1.2
+celery==4.4.7
+django-celery==3.3.1
 
 #pycryptodome>=3.9.0
 pycrypto
