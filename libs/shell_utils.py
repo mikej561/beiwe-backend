@@ -1,5 +1,6 @@
 from collections import Counter
 from datetime import timedelta
+from pprint import pprint
 from time import sleep
 
 from django.utils.timezone import localtime
@@ -11,6 +12,12 @@ from database.user_models import Participant
 
 def count():
     return FileToProcess.objects.count()
+
+def status():
+    pprint(
+        sorted(Counter(FileToProcess.objects.values_list("participant__patient_id", flat=True))
+               .most_common(), key=lambda x: x[1])
+    )
 
 
 def watch_processing():
